@@ -1,0 +1,109 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Email Templates Microservice
+# during dev, should point to your local machine
+host: localhost:10010
+# basePath prefixes all resource paths 
+basePath: /v1
+# 
+schemes:
+  # tip: remove http to make production-grade
+  - http
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  "/email-templates":
+    # binds a127 app logic to a route
+    x-swagger-router-controller: emailTemplatesCollection
+    get:
+      description: Gets a collection of email templates
+      # used as the method name of the controller
+      operationId: emailTemplatesCollection
+      parameters:
+        - name: lan
+          in: query
+          description: "ISO 639-1 language filter. E.g. es-ES,es-GT or just es"
+          required: false
+          type: string
+          collectionFormat: csv
+        - name: fields
+          in: query
+          description: "Comma separated list of field to return, if not specified it returns all fields. E.g. slug,name,subject"
+          required: false
+          type: string
+          collectionFormat: csv
+      responses:
+        "200":
+          description: A collection of email templates
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/EmailTemplateObject"
+        "401":
+          description: Unauthorized error
+          schema:
+            $ref: "#/definitions/DefaultErrorObject"
+        default:
+          description: Error object
+          schema:
+            $ref: "#/definitions/DefaultErrorObject"
+# complex objects have schema definitions
+definitions:
+  EmailTemplateObject:
+    required:
+      - name
+      - slug
+      - subject
+      - html
+      - text
+      - lan
+      - createdAt
+      - updatedAt
+    properties:
+      name:
+        type: string
+      slug:
+        type: string
+        pattern: "/^[a-z0-9-]+$/"
+      subject:
+        type: string
+      html:
+        type: string
+      text:
+        type: string
+      lan:
+        type: string
+      attachments:
+        type: array
+        items:
+          required:
+            - type
+            - name
+            - content
+          properties:
+            type:
+              type: string
+            name:
+              type: string
+            content:
+              type: string
+      createdAt:
+        type: string
+        format: dateTime
+      updatedAt:
+        type: string
+        format: dateTime
+  DefaultErrorObject:
+    required:
+      - status
+      - message
+    properties:
+      status:
+        type: string
+      message:
+        type: string
