@@ -17,13 +17,144 @@ consumes:
 produces:
   - application/json
 paths:
+  "/email-templates/{slug}":
+    x-swagger-router-controller: emailTemplatesController
+    get:
+      description: Get an email template by slug
+      operationId: getEmailTemplatesBySlugHandler
+      tags:
+        - Email Templates CRUD
+      parameters:
+        - name: slug
+          description: The email template slug
+          in: path
+          required: true
+          type: string
+          pattern: "/^[a-z0-9-]+$/"
+        - name: fields
+          in: query
+          description: "Comma separated list of field to return, if not specified it returns all fields. E.g. slug,name,subject"
+          required: false
+          type: string
+          collectionFormat: csv
+      responses:
+        "200":
+          description: A JSON with the email template information
+          schema:
+            $ref: "#/definitions/EmailTemplateObject"
+        "401":
+          description: Unauthorized error
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+        "404":
+          description: Email template not found
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+        default:
+          description: Error object
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+    put:
+      description: Updates an email template
+      operationId: updateEmailTemplatesHandler
+      tags:
+        - Email Templates CRUD
+      parameters:
+        - name: slug
+          description: The email template slug
+          in: path
+          required: true
+          type: string
+          pattern: "/^[a-z0-9-]+$/"
+        - name: emailTemplateParameters
+          in: body
+          description: The email template parameters to update in JSON format
+          required: true
+          schema:
+            properties:
+              subject:
+                type: string
+              html:
+                type: string
+              text:
+                type: string
+              lan:
+                type: array
+                items:
+                  type: string
+              attachments:
+                type: array
+                items:
+                  required:
+                    - type
+                    - name
+                    - content
+                  properties:
+                    type:
+                      type: string
+                    name:
+                      type: string
+                    content:
+                      type: string
+      responses:
+        "200":
+          description: An updated confirmation
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+        "401":
+          description: Unauthorized error
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+        "404":
+          description: Email template not found
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+        "422":
+          description: Unprocessable entity, a sent field is invalid
+          schema:
+            $ref: "#/definitions/UnprocessableEntityErrorObject"
+        default:
+          description: Error object
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+    delete:
+      description: Deletes an email template
+      operationId: deleteEmailTemplatesHandler
+      tags:
+        - Email Templates CRUD
+      parameters:
+        - name: slug
+          description: The email template slug
+          in: path
+          required: true
+          type: string
+          pattern: "/^[a-z0-9-]+$/"
+      responses:
+        "200":
+          description: A deleted confirmation
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+        "401":
+          description: Unauthorized error
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+        "404":
+          description: Email template not found
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+        default:
+          description: Error object
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
   "/email-templates":
     # binds a127 app logic to a route
-    x-swagger-router-controller: emailTemplatesCollection
+    x-swagger-router-controller: emailTemplatesController
     get:
       description: Gets a collection of email templates
+      tags:
+        - Email Templates CRUD
       # used as the method name of the controller
-      operationId: emailTemplatesCollection
+      operationId: getEmailTemplatesCollectionHandler
       parameters:
         - name: lan
           in: query
@@ -47,11 +178,127 @@ paths:
         "401":
           description: Unauthorized error
           schema:
-            $ref: "#/definitions/DefaultErrorObject"
+            $ref: "#/definitions/DefaultResponseObject"
         default:
           description: Error object
           schema:
-            $ref: "#/definitions/DefaultErrorObject"
+            $ref: "#/definitions/DefaultResponseObject"
+    post:
+      description: Create an email template
+      operationId: createEmailTemplatesHandler
+      tags:
+        - Email Templates CRUD
+      parameters:
+        - name: emailTemplateParameters
+          in: body
+          description: The email template parameters in JSON format
+          required: true
+          schema:
+            required:
+              - name
+              - subject
+              - html
+              - text
+              - lan
+            properties:
+              name:
+                type: string
+              subject:
+                type: string
+              html:
+                type: string
+              text:
+                type: string
+              lan:
+                type: array
+                items:
+                  type: string
+              attachments:
+                type: array
+                items:
+                  required:
+                    - type
+                    - name
+                    - content
+                  properties:
+                    type:
+                      type: string
+                    name:
+                      type: string
+                    content:
+                      type: string
+      responses:
+        "201":
+          description: A created confirmation
+          schema:
+            required:
+              - status
+              - message
+              - slug
+            properties:
+              status:
+                type: string
+              message:
+                type: string
+              slug:
+                type: string
+                pattern: "/^[a-z0-9-]+$/"
+        "401":
+          description: Unauthorized error
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+        "422":
+          description: Unprocessable entity, a sent field is invalid
+          schema:
+            $ref: "#/definitions/UnprocessableEntityErrorObject"
+        default:
+          description: Error object
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+  "/email-templates/{slug}/instances":
+    # binds a127 app logic to a route
+    x-swagger-router-controller: emailTemplateInstancesController
+    post:
+      description: Create an email template instance
+      operationId: createEmailTemplateInstancesHandler
+      tags:
+        - Email Template Instances
+      parameters:
+        - name: slug
+          description: The email template slug
+          in: path
+          required: true
+          type: string
+          pattern: "/^[a-z0-9-]+$/"
+        - name: emailTemplateInstanceVariableValues
+          in: body
+          description: The email template variables values in JSON format
+          required: true
+          schema:
+            required:
+              - variablesValues
+            properties:
+              variablesValues:
+                properties:
+                 example:
+                  type: string
+      responses:
+        "200":
+          description: A JSON with the filled email template
+          schema:
+            $ref: "#/definitions/EmailTemplateInstanceObject"
+        "401":
+          description: Unauthorized error
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
+        "422":
+          description: Unprocessable entity, a sent field is invalid
+          schema:
+            $ref: "#/definitions/UnprocessableEntityErrorObject"
+        default:
+          description: Error object
+          schema:
+            $ref: "#/definitions/DefaultResponseObject"
 # complex objects have schema definitions
 definitions:
   EmailTemplateObject:
@@ -98,7 +345,45 @@ definitions:
       updatedAt:
         type: string
         format: dateTime
-  DefaultErrorObject:
+  EmailTemplateInstanceObject:
+    required:
+      - subject
+      - html
+      - text
+    properties:
+      subject:
+        type: string
+      html:
+        type: string
+      text:
+        type: string
+      attachments:
+        type: array
+        items:
+          required:
+            - type
+            - name
+            - content
+          properties:
+            type:
+              type: string
+            name:
+              type: string
+            content:
+              type: string
+  UnprocessableEntityErrorObject:
+    required:
+      - status
+      - path
+      - message
+    properties:
+      status:
+        type: string
+      path:
+        type: string
+      message:
+        type: string
+  DefaultResponseObject:
     required:
       - status
       - message
