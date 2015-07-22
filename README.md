@@ -1,1 +1,3 @@
-# Skeleton project for Swagger
+# Fleetster Email Templates Microservice
+
+
