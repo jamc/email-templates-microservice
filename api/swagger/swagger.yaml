@@ -1,12 +1,11 @@
 swagger: "2.0"
 info:
   version: "0.0.1"
-  title: Email Templates Microservice
+  title: Fleetster Email Templates Microservice
 # during dev, should point to your local machine
 host: localhost:10010
 # basePath prefixes all resource paths 
 basePath: /v1
-# 
 schemes:
   # tip: remove http to make production-grade
   - http
@@ -33,7 +32,7 @@ paths:
           pattern: "/^[a-z0-9-]+$/"
         - name: fields
           in: query
-          description: "Comma separated list of field to return, if not specified it returns all fields. E.g. slug,name,subject"
+          description: "Comma separated list of the fields to return, if not specified it returns all fields. E.g. slug,name,subject"
           required: false
           type: string
           collectionFormat: csv
@@ -71,31 +70,7 @@ paths:
           description: The email template parameters to update in JSON format
           required: true
           schema:
-            properties:
-              subject:
-                type: string
-              html:
-                type: string
-              text:
-                type: string
-              lan:
-                type: array
-                items:
-                  type: string
-              attachments:
-                type: array
-                items:
-                  required:
-                    - type
-                    - name
-                    - content
-                  properties:
-                    type:
-                      type: string
-                    name:
-                      type: string
-                    content:
-                      type: string
+            $ref: "#/definitions/UpdateTemplateObject"
       responses:
         "200":
           description: An updated confirmation
@@ -194,39 +169,7 @@ paths:
           description: The email template parameters in JSON format
           required: true
           schema:
-            required:
-              - name
-              - subject
-              - html
-              - text
-              - lan
-            properties:
-              name:
-                type: string
-              subject:
-                type: string
-              html:
-                type: string
-              text:
-                type: string
-              lan:
-                type: array
-                items:
-                  type: string
-              attachments:
-                type: array
-                items:
-                  required:
-                    - type
-                    - name
-                    - content
-                  properties:
-                    type:
-                      type: string
-                    name:
-                      type: string
-                    content:
-                      type: string
+            $ref: "#/definitions/CreateTemplateObject"
       responses:
         "201":
           description: A created confirmation
@@ -301,6 +244,51 @@ paths:
             $ref: "#/definitions/DefaultResponseObject"
 # complex objects have schema definitions
 definitions:
+  AttachmentsArray:
+    type: array
+    items:
+      required:
+        - type
+        - name
+        - content
+      properties:
+        type:
+          type: string
+        name:
+          type: string
+        content:
+          type: string
+  CreateTemplateObject:
+    required:
+      - name
+      - subject
+      - html
+      - text
+      - lan
+    properties:
+      name:
+        type: string
+      subject:
+        type: string
+      html:
+        type: string
+      text:
+        type: string
+      lan:
+        type: array
+        items:
+          type: string
+      attachments:
+        $ref: "#/definitions/AttachmentsArray"
+  DefaultResponseObject:
+    required:
+      - status
+      - message
+    properties:
+      status:
+        type: string
+      message:
+        type: string
   EmailTemplateObject:
     required:
       - name
@@ -326,19 +314,7 @@ definitions:
       lan:
         type: string
       attachments:
-        type: array
-        items:
-          required:
-            - type
-            - name
-            - content
-          properties:
-            type:
-              type: string
-            name:
-              type: string
-            content:
-              type: string
+        $ref: "#/definitions/AttachmentsArray"
       createdAt:
         type: string
         format: dateTime
@@ -358,19 +334,7 @@ definitions:
       text:
         type: string
       attachments:
-        type: array
-        items:
-          required:
-            - type
-            - name
-            - content
-          properties:
-            type:
-              type: string
-            name:
-              type: string
-            content:
-              type: string
+        $ref: "#/definitions/AttachmentsArray"
   UnprocessableEntityErrorObject:
     required:
       - status
@@ -383,12 +347,17 @@ definitions:
         type: string
       message:
         type: string
-  DefaultResponseObject:
-    required:
-      - status
-      - message
+  UpdateTemplateObject:
     properties:
-      status:
+      subject:
         type: string
-      message:
+      html:
         type: string
+      text:
+        type: string
+      lan:
+        type: array
+        items:
+          type: string
+      attachments:
+        $ref: "#/definitions/AttachmentsArray"
