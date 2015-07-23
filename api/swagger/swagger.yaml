@@ -29,7 +29,7 @@ paths:
           in: path
           required: true
           type: string
-          pattern: "/^[a-z0-9-]+$/"
+          pattern: "^[a-z0-9-]+$"
         - name: fields
           in: query
           description: "Comma separated list of the fields to return, if not specified it returns all fields. E.g. slug,name,subject"
@@ -64,7 +64,7 @@ paths:
           in: path
           required: true
           type: string
-          pattern: "/^[a-z0-9-]+$/"
+          pattern: "^[a-z0-9-]+$"
         - name: emailTemplateParameters
           in: body
           description: The email template parameters to update in JSON format
@@ -103,7 +103,7 @@ paths:
           in: path
           required: true
           type: string
-          pattern: "/^[a-z0-9-]+$/"
+          pattern: "^[a-z0-9-]+$"
       responses:
         "200":
           description: A deleted confirmation
@@ -185,7 +185,7 @@ paths:
                 type: string
               slug:
                 type: string
-                pattern: "/^[a-z0-9-]+$/"
+                pattern: "^[a-z0-9-]+$"
         "401":
           description: Unauthorized error
           schema:
@@ -212,7 +212,7 @@ paths:
           in: path
           required: true
           type: string
-          pattern: "/^[a-z0-9-]+$/"
+          pattern: "^[a-z0-9-]+$"
         - name: emailTemplateInstanceVariableValues
           in: body
           description: The email template variables values in JSON format
@@ -297,14 +297,14 @@ definitions:
       - html
       - text
       - lan
-      - createdAt
-      - updatedAt
+      # - createdAt
+      # - updatedAt
     properties:
       name:
         type: string
       slug:
         type: string
-        pattern: "/^[a-z0-9-]+$/"
+        pattern: "^[a-z0-9-]+$"
       subject:
         type: string
       html:
@@ -312,15 +312,17 @@ definitions:
       text:
         type: string
       lan:
-        type: string
+        type: array
+        items:
+          type: string
       attachments:
         $ref: "#/definitions/AttachmentsArray"
       createdAt:
         type: string
-        format: dateTime
+        format: date-time
       updatedAt:
         type: string
-        format: dateTime
+        format: date-time
   EmailTemplateInstanceObject:
     required:
       - subject
