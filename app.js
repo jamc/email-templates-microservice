@@ -1,7 +1,9 @@
 'use strict';
 
-var SwaggerExpress = require('swagger-express-mw');
-var app = require('express')();
+var unprocessableEntityMW = require('unprocessable-entity-mw');
+var notFoundMW            = require('not-found-mw');
+var SwaggerExpress        = require('swagger-express-mw');
+var app                   = require('express')();
 module.exports = app; // for testing
 
 var config = {
@@ -14,8 +16,11 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
   // install middleware
   swaggerExpress.register(app);
 
+  app.use(notFoundMW);
+  app.use(unprocessableEntityMW);
+
   var port = process.env.PORT || 10010;
   app.listen(port);
 
-  console.log('try this:\ncurl http://127.0.0.1:' + port + '/hello?name=Scott');
+  console.log('Email templates microservice started on port ' + port);
 });

@@ -9,10 +9,12 @@
   "main": "app.js",
   "dependencies": {
     "express": "^4.12.3",
-    "swagger-express-mw": "0.0.x"
+    "swagger-express-mw": "0.0.x",
+    "not-found-mw": "ssh+git@github.com:jamc/not-found-mw.git#0.0.1",
+    "unprocessable-entity-mw": "ssh+git@github.com:jamc/unprocessable-entity-mw.git#0.0.1"
   },
   "devDependencies": {
-    "should": "^5.2.0",
-    "supertest": "^0.15.0"
+    "should": "^7.0.2",
+    "supertest": "^1.0.1"
   }
 }
