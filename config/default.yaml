@@ -5,5 +5,6 @@ swagger:
   mapErrorsToJson: true
   docEndpoints:
     raw: /swagger
-
+logger:
+  logLevel: info
 # any other values in this file are just loaded into the config for application access...

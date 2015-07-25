@@ -9,9 +9,13 @@
   "main": "app.js",
   "dependencies": {
     "express": "^4.12.3",
-    "swagger-express-mw": "0.0.x",
+    "logger-initializer": "ssh+git@github.com:jamc/logger-initializer.git#0.0.2",
+    "moment": "^2.10.3",
     "not-found-mw": "ssh+git@github.com:jamc/not-found-mw.git#0.0.1",
-    "unprocessable-entity-mw": "ssh+git@github.com:jamc/unprocessable-entity-mw.git#0.0.1"
+    "internal-error-mw": "ssh+git@github.com:jamc/internal-error-mw.git#0.0.1",
+    "swagger-express-mw": "0.0.x",
+    "unprocessable-entity-mw": "ssh+git@github.com:jamc/unprocessable-entity-mw.git#0.0.1",
+    "winston": "^1.0.1"
   },
   "devDependencies": {
     "should": "^7.0.2",
