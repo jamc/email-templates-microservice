@@ -6,5 +6,12 @@ swagger:
   docEndpoints:
     raw: /swagger
 logger:
-  logLevel: info
+  logLevel: debug
+database:
+  user: fleetster
+  password: fleetster456
+  host: localhost
+  database: email_templates
+  connectionLimit: 10
+  acquireTimeout: 2000
 # any other values in this file are just loaded into the config for application access...

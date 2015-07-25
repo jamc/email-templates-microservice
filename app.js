@@ -1,27 +1,28 @@
-var unprocessableEntityMW = require('unprocessable-entity-mw');
-var notFoundMW            = require('not-found-mw');
-var internalErrorMW       = require('internal-error-mw');
 var SwaggerExpress        = require('swagger-express-mw');
 var app                   = require('express')();
 var logger                = require('logger-initializer');
 
-module.exports = app; // for testing
-
 var config = {
-  appRoot: __dirname // required config
+  appRoot: __dirname
 };
 
 SwaggerExpress.create(config, function(err, swaggerExpress) {
   if (err) { throw err; }
 
-  logger = logger(swaggerExpress.config.logger.logLevel);
+  // Initialize logger
+  var logger = require('logger-initializer')(swaggerExpress.config.logger.logLevel);
 
-  // install middleware
+  // Initialize database connections pool
+  var databasePool = require('./api/helpers/database/connectionPool');
+  databasePool.init('pool1', swaggerExpress.config.database);
+
+  // Install Swagger Express Middleware
   swaggerExpress.register(app);
 
-  app.use(notFoundMW);
-  app.use(unprocessableEntityMW);
-  app.use(internalErrorMW);
+  // Register middlewares
+  app.use(require('not-found-mw'));
+  app.use(require('unprocessable-entity-mw'));
+  app.use(require('internal-error-mw'));
 
   var port = process.env.PORT || 10010;
   app.listen(port);

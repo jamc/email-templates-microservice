@@ -1,3 +1,8 @@
+var Promise = require('bluebird');
+var logger  = require('logger-initializer')();
+
+var insertTemplates = require('../helpers/database/insertTemplates');
+
 module.exports = {
   getEmailTemplatesBySlugHandler      : getEmailTemplatesBySlugHandler,
   updateEmailTemplatesHandler         : updateEmailTemplatesHandler,
@@ -104,13 +109,22 @@ function getEmailTemplatesCollectionHandler(req, res) {
  * @param  {object}   res   Express response object
  * @param  {function} next  Express next function
  */
-function createEmailTemplatesHandler(req, res) {
-  var burnedResponse = {
-    status  : 'Created',
-    message : 'Email template successfully created',
-    slug    : 'welcome-email'
-  };
+function createEmailTemplatesHandler(req, res, next) {
+  insertTemplates(req.body)
+    .then(function templateInserted(slug) {
+      var creationResponse = {
+        status  : 'Created',
+        message : 'Email template successfully created',
+        slug    : slug
+      };
 
-  res.status(201);
-  res.json(burnedResponse);
+      logger.info('Sending 201 to client');
+
+      res.status(201);
+      res.json(creationResponse);
+    })
+    .catch(function errorOcurred(error) {
+      next(error);
+    })
+    .done();
 }
