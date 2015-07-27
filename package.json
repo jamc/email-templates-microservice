@@ -8,9 +8,11 @@
   "license": "",
   "main": "app.js",
   "dependencies": {
+    "async": "^1.4.0",
     "bluebird": "^2.9.34",
     "express": "^4.12.3",
     "internal-error-mw": "ssh+git@github.com:jamc/internal-error-mw.git#0.0.3",
+    "lodash": "^3.10.0",
     "logger-initializer": "ssh+git@github.com:jamc/logger-initializer.git#0.0.2",
     "moment": "^2.10.3",
     "mysql": "^2.8.0",

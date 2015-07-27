@@ -1,7 +1,10 @@
 var Promise = require('bluebird');
 var logger  = require('logger-initializer')();
+var _       = require('lodash');
 
-var insertTemplates = require('../helpers/database/insertTemplates');
+var templatesModel          = require('../helpers/models/templatesModel');
+var languagesModel          = require('../helpers/models/languagesModel');
+var templatesLanguagesModel = require('../helpers/models/templatesLanguagesModel');
 
 module.exports = {
   getEmailTemplatesBySlugHandler      : getEmailTemplatesBySlugHandler,
@@ -110,12 +113,27 @@ function getEmailTemplatesCollectionHandler(req, res) {
  * @param  {function} next  Express next function
  */
 function createEmailTemplatesHandler(req, res, next) {
-  insertTemplates(req.body)
-    .then(function templateInserted(slug) {
+
+  var template, languages;
+
+  templatesModel.insertTemplates(req.body)
+    .then(function templateInserted(templateInfo) {
+      template = templateInfo;
+      return languagesModel.insertLanguages(req.body.lan);
+    })
+    .then(function languagesInserted(languagesIds) {
+      languages = languagesIds;
+      var relations = [];
+      _.forEach(languagesIds, function (languageId) {
+        relations.push([template.id, languageId]);
+      });
+      return templatesLanguagesModel.insertTemplatesLanguages(relations);
+    })
+    .then(function templateInserted(result) {
       var creationResponse = {
         status  : 'Created',
         message : 'Email template successfully created',
-        slug    : slug
+        slug    : template.slug
       };
 
       logger.info('Sending 201 to client');

@@ -13,7 +13,7 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
   var logger = require('logger-initializer')(swaggerExpress.config.logger.logLevel);
 
   // Initialize database connections pool
-  var databasePool = require('./api/helpers/database/connectionPool');
+  var databasePool = require('./api/helpers/models/connectionPool');
   databasePool.init('pool1', swaggerExpress.config.database);
 
   // Install Swagger Express Middleware
