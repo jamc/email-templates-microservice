@@ -2,9 +2,9 @@ var Promise = require('bluebird');
 var logger  = require('logger-initializer')();
 var _       = require('lodash');
 
-var templatesModel          = require('../helpers/models/templatesModel');
-var languagesModel          = require('../helpers/models/languagesModel');
-var templatesLanguagesModel = require('../helpers/models/templatesLanguagesModel');
+var templatesModel          = require('../models/templatesModel');
+var languagesModel          = require('../models/languagesModel');
+var templatesLanguagesModel = require('../models/templatesLanguagesModel');
 
 module.exports = {
   getEmailTemplatesBySlugHandler      : getEmailTemplatesBySlugHandler,
