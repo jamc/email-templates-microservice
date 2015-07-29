@@ -5,14 +5,7 @@ var _       = require('lodash');
 var templatesModel          = require('../models/templatesModel');
 var languagesModel          = require('../models/languagesModel');
 var templatesLanguagesModel = require('../models/templatesLanguagesModel');
-
-module.exports = {
-  getEmailTemplatesBySlugHandler      : getEmailTemplatesBySlugHandler,
-  updateEmailTemplatesHandler         : updateEmailTemplatesHandler,
-  deleteEmailTemplatesHandler         : deleteEmailTemplatesHandler,
-  getEmailTemplatesCollectionHandler  : getEmailTemplatesCollectionHandler,
-  createEmailTemplatesHandler         : createEmailTemplatesHandler
-};
+var attachmentsModel        = require('../models/attachmentsModel');
 
 /**
  * Responds the requested email template if exists
@@ -114,22 +107,27 @@ function getEmailTemplatesCollectionHandler(req, res) {
  */
 function createEmailTemplatesHandler(req, res, next) {
 
-  var template, languages;
+  var template;
 
   templatesModel.insertTemplates(req.body)
-    .then(function templateInserted(templateInfo) {
+    .then(function insertLanguages(templateInfo) {
       template = templateInfo;
       return languagesModel.insertLanguages(req.body.lan);
     })
-    .then(function languagesInserted(languagesIds) {
-      languages = languagesIds;
+    .then(function insertTemplatesLanguages(languagesIds) {
       var relations = [];
       _.forEach(languagesIds, function (languageId) {
         relations.push([template.id, languageId]);
       });
       return templatesLanguagesModel.insertTemplatesLanguages(relations);
     })
-    .then(function templateInserted(result) {
+    .then(function insertAttachments() {
+      if (!req.body.attachments) {
+        return;
+      }
+      return attachmentsModel.insertAttachments(template.id, req.body.attachments);
+    })
+    .then(function handleResults() {
       var creationResponse = {
         status  : 'Created',
         message : 'Email template successfully created',
@@ -146,3 +144,11 @@ function createEmailTemplatesHandler(req, res, next) {
     })
     .done();
 }
+
+module.exports = {
+  getEmailTemplatesBySlugHandler      : getEmailTemplatesBySlugHandler,
+  updateEmailTemplatesHandler         : updateEmailTemplatesHandler,
+  deleteEmailTemplatesHandler         : deleteEmailTemplatesHandler,
+  getEmailTemplatesCollectionHandler  : getEmailTemplatesCollectionHandler,
+  createEmailTemplatesHandler         : createEmailTemplatesHandler
+};

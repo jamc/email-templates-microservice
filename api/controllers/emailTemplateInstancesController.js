@@ -1,7 +1,3 @@
-module.exports = {
-  createEmailTemplateInstancesHandler : createEmailTemplateInstancesHandler
-};
-
 /**
  * Creates an email temaplate instance
  * @param  {object}   req   Express request object
@@ -24,3 +20,7 @@ function createEmailTemplateInstancesHandler(req, res) {
 
   res.json(burnedResponse);
 }
+
+module.exports = {
+  createEmailTemplateInstancesHandler : createEmailTemplateInstancesHandler
+};

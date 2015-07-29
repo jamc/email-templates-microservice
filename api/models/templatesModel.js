@@ -4,10 +4,6 @@ var createSlug  = require('slug');
 var pool        = require('./connectionPool').pool1;
 var moment      = require('moment');
 
-module.exports = {
-  insertTemplates: insertTemplates
-};
-
 /**
  * Inserts a template to database
  * @param  {object} templateInfo The template information
@@ -52,3 +48,7 @@ function insertTemplates(templateInfo) {
 
   return resolver.promise;
 }
+
+module.exports = {
+  insertTemplates: insertTemplates
+};

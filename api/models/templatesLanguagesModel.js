@@ -4,43 +4,6 @@ var async   = require('async');
 var pool    = Promise.promisifyAll(require('./connectionPool').pool1);
 var moment  = require('moment');
 
-module.exports = {
-  insertTemplatesLanguages  : insertTemplatesLanguages,
-  insertTemplateLanguage    : insertTemplateLanguage
-};
-
-/**
- * Inserts an array of templates languages relations into database
- * @param  {array}  templatesLanguages Array of ordered pairs being the first 
- *                                     one the templateId and the second the languageId
- * @return {Promise}                   The promise to resolve
- */
-function insertTemplatesLanguages(templatesLanguages) {
-  logger.info('Inserting templates languages relations into database');
-
-  var resolver      = Promise.pending();
-
-  async.each(templatesLanguages, function (templateLanguage, callback) {
-
-    insertTemplateLanguage(templateLanguage[0], templateLanguage[1])
-      .then(function handleResult(result) {
-        return callback();
-      })
-      .catch(function (error) {
-        callback(error);
-      })
-      .done();
-
-  }, function (error) {
-    if (error) {
-      return resolver.reject(error);
-    }
-    resolver.resolve(true);
-  });
-
-  return resolver.promise;
-}
-
 /**
  * Insert a templates languages relation to database
  * @param  {integer} templateId The template id
@@ -74,3 +37,40 @@ function insertTemplateLanguage(templateId, languageId) {
 
   return resolver.promise;
 }
+
+/**
+ * Inserts an array of templates languages relations into database
+ * @param  {array}  templatesLanguages Array of ordered pairs being the first 
+ *                                     one the templateId and the second the languageId
+ * @return {Promise}                   The promise to resolve
+ */
+function insertTemplatesLanguages(templatesLanguages) {
+  logger.info('Inserting templates languages relations into database');
+
+  var resolver      = Promise.pending();
+
+  async.each(templatesLanguages, function (templateLanguage, callback) {
+
+    insertTemplateLanguage(templateLanguage[0], templateLanguage[1])
+      .then(function handleResult() {
+        return callback();
+      })
+      .catch(function (error) {
+        callback(error);
+      })
+      .done();
+
+  }, function (error) {
+    if (error) {
+      return resolver.reject(error);
+    }
+    resolver.resolve(true);
+  });
+
+  return resolver.promise;
+}
+
+module.exports = {
+  insertTemplatesLanguages  : insertTemplatesLanguages,
+  insertTemplateLanguage    : insertTemplateLanguage
+};
