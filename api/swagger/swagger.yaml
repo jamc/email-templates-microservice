@@ -290,15 +290,6 @@ definitions:
       message:
         type: string
   EmailTemplateObject:
-    required:
-      - name
-      - slug
-      - subject
-      - html
-      - text
-      - lan
-      # - createdAt
-      # - updatedAt
     properties:
       name:
         type: string

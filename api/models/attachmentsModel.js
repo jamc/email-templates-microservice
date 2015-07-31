@@ -1,6 +1,7 @@
 var logger  = require('logger-initializer')();
 var Promise = require('bluebird');
 var async   = require('async');
+var _       = require('lodash');
 var pool    = require('./connectionPool').pool1;
 var moment  = require('moment');
 
@@ -75,7 +76,46 @@ function insertAttachments(templateId, attachments) {
   return resolver.promise;
 }
 
+/**
+ * Gets all the attachments from a template
+ * @param  {integer} templateId The template id
+ * @return {Promise}            The promise to resolve
+ */
+function getAttachments(templateId) {
+  logger.info('Getting attachments from database');
+
+  var resolver      = Promise.pending();
+  var selectQuery   = 'SELECT name, type, content FROM Attachments WHERE templates_id = ' + templateId + ';';
+  var connection;
+
+  logger.debug(selectQuery);
+
+  pool.getConnectionAsync()
+    .then(function runTemplateQuery(_connection) {
+      connection = Promise.promisifyAll(_connection);
+      return connection.queryAsync(selectQuery);
+    })
+    .then(function handleResult(rows) {
+      connection.release();
+
+      logger.debug('Attachments found: ', rows[0].length);
+      var attachments = [];
+      _.forEach(rows[0], function bufferToString(attachment) {
+        attachment.content = attachment.content.toString();
+        attachments.push(attachment);
+      });
+      resolver.resolve(attachments);
+    })
+    .catch(function handleError(error) {
+      resolver.reject(error);
+    })
+    .done();
+
+  return resolver.promise;
+}
+
 module.exports = {
   insertAttachments : insertAttachments,
-  insertAttachment  : insertAttachment
+  insertAttachment  : insertAttachment,
+  getAttachments    : getAttachments
 };

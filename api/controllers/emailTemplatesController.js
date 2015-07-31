@@ -14,27 +14,24 @@ var attachmentsModel        = require('../models/attachmentsModel');
  * @param  {function} next  Express next function
  */
 function getEmailTemplatesBySlugHandler(req, res, next) {
-  var burnedResponse = {
-    name    : 'Welcome Email',
-    slug    : 'welcome-email',
-    subject : 'Welcome to Fleetster',
-    html    : '<h1>Welcome {{firstName}} {{lastName}}</h1>',
-    text    : 'Welcome {{firstName}} {{lastName}}',
-    lan     : [
-      'en-GB'
-    ],
-    attachments: [
-      {
-        type    : 'text/plain',
-        name    : 'myfile.txt',
-        content : 'ZXhhbXBsZSBmaWxl'
-      }
-    ],
-    createdAt: '2015-07-16T09:35:00z',
-    updatedAt: '2015-07-16T09:35:00z'
-  };
 
-  res.json(burnedResponse);
+  var params = req.swagger.params;
+
+  templatesModel.getTemplate(params.slug.value, params.fields.value)
+    .then(function handleResult(template) {
+      var responseBody = template;
+      if (!template) {
+        res.status(404);
+        responseBody = {
+          status  : 'Not Found',
+          message : 'The requested resource does not exists'
+        };
+      }
+      res.json(responseBody);
+    })
+    .catch(function handleError(err) {
+      next(err);
+    });
 }
 
 /**
@@ -109,7 +106,7 @@ function createEmailTemplatesHandler(req, res, next) {
 
   var template;
 
-  templatesModel.insertTemplates(req.body)
+  templatesModel.insertTemplate(req.body)
     .then(function insertLanguages(templateInfo) {
       template = templateInfo;
       return languagesModel.insertLanguages(req.body.lan);

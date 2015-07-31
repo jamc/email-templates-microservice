@@ -1,8 +1,47 @@
 var logger  = require('logger-initializer')();
 var Promise = require('bluebird');
 var async   = require('async');
+var _       = require('lodash');
 var pool    = require('./connectionPool').pool1;
 var moment  = require('moment');
+
+/**
+ * Get all languages from a given template
+ * @param  {integer} templateId The template id
+ * @return {Promise}            The promise to resolve
+ */
+function getLanguages(templateId) {
+  logger.info('Getting languages from template id ' + templateId + ' from database');
+
+  var resolver    = Promise.pending();
+  var selectQuery = 'SELECT L.code FROM Languages AS L ' +
+                    'INNER JOIN Templates_Languages AS TL ON TL.languages_id = L.id ' +
+                    'WHERE TL.templates_id = ' + templateId + ';';
+  var connection;
+
+  logger.debug(selectQuery);
+
+  pool.getConnectionAsync()
+    .then(function runQuery(_connection) {
+      connection = Promise.promisifyAll(_connection);
+      return connection.queryAsync(selectQuery);
+    })
+    .then(function handleResult(rows) {
+      connection.release();
+      logger.info('Languages found', rows[0]);
+      var languages = [];
+      _.forEach(rows[0], function processLanguages(language) {
+        languages.push(language.code);
+      });
+      resolver.resolve(languages);
+    })
+    .catch(function handleError(error) {
+      resolver.reject(error);
+    })
+    .done();
+
+  return resolver.promise;
+}
 
 /**
  * Get a language from database based on the given code
@@ -116,5 +155,6 @@ function insertLanguages(languages) {
 module.exports = {
   insertLanguages : insertLanguages,
   insertLanguage  : insertLanguage,
-  getLanguage     : getLanguage
+  getLanguage     : getLanguage,
+  getLanguages    : getLanguages
 };
