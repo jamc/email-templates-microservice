@@ -70,30 +70,16 @@ function deleteEmailTemplatesHandler(req, res) {
  * @param  {object}   res   Express response object
  * @param  {function} next  Express next function
  */
-function getEmailTemplatesCollectionHandler(req, res) {
-  var burnedResponse = [
-    {
-      name    : 'Welcome Email',
-      slug    : 'welcome-email',
-      subject : 'Welcome to Fleetster',
-      html    : '<h1>Welcome {{firstName}} {{lastName}}</h1>',
-      text    : 'Welcome {{firstName}} {{lastName}}',
-      lan     : [
-        'en-GB'
-      ],
-      attachments: [
-        {
-          type    : 'text/plain',
-          name    : 'myfile.txt',
-          content : 'ZXhhbXBsZSBmaWxl'
-        }
-      ],
-      createdAt: '2015-07-16T09:35:00z',
-      updatedAt: '2015-07-16T09:35:00z'
-    }
-  ];
+function getEmailTemplatesCollectionHandler(req, res, next) {
+  var params = req.swagger.params;
 
-  res.json(burnedResponse);
+  templatesModel.getTemplates(params.fields.value)
+    .then(function handleResult(templates) {
+      res.json(templates);
+    })
+    .catch(function handleError(err) {
+      next(err);
+    });
 }
 
 /**

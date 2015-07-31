@@ -6,6 +6,7 @@ var attachmentsModel  = require('./attachmentsModel');
 var languagesModel    = require('./languagesModel');
 var moment            = require('moment');
 var _                 = require('lodash');
+var async             = require('async');
 
 /**
  * Inserts a template to database
@@ -37,6 +38,7 @@ function insertTemplate(templateInfo) {
     })
     .then(function handleResult(rows) {
       connection.release();
+
       var insertedResponse = {
         id    : rows[0].insertId,
         slug  : slug
@@ -53,10 +55,60 @@ function insertTemplate(templateInfo) {
 }
 
 /**
+ * Get all templates by slug
+ * @param  {string} fields Comma separated string with the fields to return,
+ *                         the default is all fields
+ * @return {Promise}       The promise to resolve
+ */
+function getTemplates(fields) {
+  logger.info('Getting all templates from database');
+
+  var resolver    = Promise.pending();
+  var selectQuery = generateSelectQuery(['slug'], ['slug']);
+  var templates   = [];
+  var connection;
+
+  logger.debug(selectQuery);
+
+  pool.getConnectionAsync()
+    .then(function runQuery(_connection) {
+      connection = Promise.promisifyAll(_connection);
+      return connection.queryAsync(selectQuery);
+    })
+    .then(function handleResult(rows) {
+      connection.release();
+      async.each(rows[0], function getTemplateBySlug(template, callback) {
+        getTemplate(template.slug, fields)
+          .then(function handleTemplatesResult(template) {
+            templates.push(template);
+            callback();
+          })
+          .catch(function handleError(error) {
+            callback(error);
+          })
+          .done();
+      }, function(error){
+        if (error) {
+          resolver.reject(error);
+        }
+        logger.debug('Templates obtained: ' + templates.length);
+        resolver.resolve(templates);
+      });
+    })
+    .catch(function handleError(error) {
+      resolver.reject(error);
+    })
+    .done();
+
+  return resolver.promise;
+}
+
+/**
  * Creates a select query for the Templates table
  * @param  {array}  receivedFields  The fields to query
  * @param  {array}  supportedFields The supported fields to return
- * @param  {string} slug            The template slug
+ * @param  {string} slug            The template slug, if not defined
+ *                                  there will not be WHERE clause
  * @return {string}                 The select query
  */
 function generateSelectQuery(receivedFields, supportedFields, slug) {
@@ -72,7 +124,11 @@ function generateSelectQuery(receivedFields, supportedFields, slug) {
       }
     }
   });
-  selectQuery += ' FROM Templates WHERE slug = "' + slug + '";';
+  selectQuery += ' FROM Templates';
+  if (!!slug) {
+    selectQuery += '  WHERE slug = "' + slug + '"';
+  }
+  selectQuery += ';';
   return selectQuery;
 }
 
@@ -154,5 +210,6 @@ function getTemplate(slug, fields) {
 
 module.exports = {
   insertTemplate  : insertTemplate,
-  getTemplate     : getTemplate
+  getTemplate     : getTemplate,
+  getTemplates    : getTemplates
 };
